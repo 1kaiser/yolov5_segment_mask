@@ -192,7 +192,7 @@ def run(
                 mask_combined[mask_combined==2] = 0
         
                 print(torch.max(mask_combined))
-
+                print(torch.min(mask_combined))
                 annotator.masks(
                     mask_combined,
                     colors=[colors(x, True) for x in det[:, 5]],
