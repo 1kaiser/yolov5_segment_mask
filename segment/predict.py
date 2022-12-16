@@ -174,25 +174,16 @@ def run(
 
                 # Mask plotting
                 print([colors(x, True) for x in det[:, 5]])
-                print(masks.shape)
                 mask_combined = torch.zeros([masks.shape[1],masks.shape[2]])
-                print(mask_combined.shape)
-                print(torch.max(mask_combined))
 
                 for i in range(0,masks.shape[0]):
                   mask_combined = mask_combined  + masks[i]
-                  print(mask_combined.shape)
-                  print(torch.max(mask_combined))
-
                 mask_combined = torch.unsqueeze(mask_combined, dim= 0)
-                print(mask_combined.shape)  
                 mask_combined[mask_combined>0] = 1     
                 # mask_combined[mask_combined==1] = 2 
                 # mask_combined[mask_combined==0] = 1
                 # mask_combined[mask_combined==2] = 0
-        
-                print(torch.max(mask_combined))
-                print(torch.min(mask_combined))
+
                 annotator.masks(
                     mask_combined,
                     colors=[colors(x, True) for x in det[:, 5]],
