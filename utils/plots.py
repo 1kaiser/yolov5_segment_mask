@@ -42,7 +42,7 @@ class Colors:
 
     def __call__(self, i, bgr=False):
         c = self.palette[int(i) % self.n]
-        return (c[2], c[1], c[0]) if bgr else c
+        return (255,255,255) if bgr else c
 
     @staticmethod
     def hex2rgb(h):  # rgb order (PIL)
@@ -81,9 +81,9 @@ class Annotator:
                                        size=font_size or max(round(sum(self.im.size) / 2 * 0.035), 12))
         else:  # use cv2
             self.im = im
-        self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
+        self.lw = line_width # or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
 
-    def box_label(self, box, label='', color=(128, 128, 128), txt_color=(255, 255, 255)):
+    def box_label(self, box, label='', color=(0,0,0), txt_color=(255, 255, 255)):
         # Add one xyxy box to image with label
         if self.pil or not is_ascii(label):
             self.draw.rectangle(box, width=self.lw, outline=color)  # box
@@ -99,7 +99,7 @@ class Annotator:
                 self.draw.text((box[0], box[1] - h if outside else box[1]), label, fill=txt_color, font=self.font)
         else:  # cv2
             p1, p2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
-            cv2.rectangle(self.im, p1, p2, color, thickness=self.lw, lineType=cv2.LINE_AA)
+            # cv2.rectangle(self.im, p1, p2, color, thickness=self.lw, lineType=cv2.LINE_AA)
             if label:
                 tf = max(self.lw - 1, 1)  # font thickness
                 w, h = cv2.getTextSize(label, 0, fontScale=self.lw / 3, thickness=tf)[0]  # text width, height
@@ -114,7 +114,7 @@ class Annotator:
                             thickness=tf,
                             lineType=cv2.LINE_AA)
 
-    def masks(self, masks, colors, im_gpu, alpha=0.5, retina_masks=False):
+    def masks(self, masks, colors, im_gpu, alpha=1, retina_masks=False):
         """Plot masks at once.
         Args:
             masks (tensor): predicted masks on cuda, shape: [n, h, w]
@@ -134,7 +134,9 @@ class Annotator:
 
         inv_alph_masks = (1 - masks * alpha).cumprod(0)  # shape(n,h,w,1)
         mcs = (masks_color * inv_alph_masks).sum(0) * 2  # mask color summand shape(n,h,w,3)
-
+        print(mcs.shape)
+        mcs[mcs==0] = 1
+        print(torch.max(mcs))
         im_gpu = im_gpu.flip(dims=[0])  # flip channel
         im_gpu = im_gpu.permute(1, 2, 0).contiguous()  # shape(h,w,3)
         im_gpu = im_gpu * inv_alph_masks[-1] + mcs
@@ -144,9 +146,9 @@ class Annotator:
             # convert im back to PIL and update draw
             self.fromarray(self.im)
 
-    def rectangle(self, xy, fill=None, outline=None, width=1):
+    #def rectangle(self, xy, fill=None, outline=None, width=0):
         # Add rectangle to image (PIL-only)
-        self.draw.rectangle(xy, fill, outline, width)
+        #self.draw.rectangle(xy, fill, outline, width)
 
     def text(self, xy, text, txt_color=(255, 255, 255), anchor='top'):
         # Add text to image (PIL-only)
