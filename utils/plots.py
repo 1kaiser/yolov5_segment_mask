@@ -135,11 +135,8 @@ class Annotator:
         mcs = 1-(masks_color * inv_alph_masks).sum(0) # mask color summand shape(n,h,w,3)
         im_gpu = im_gpu.flip(dims=[0])  # flip channel
         im_gpu = im_gpu.permute(1, 2, 0).contiguous()  # shape(h,w,3)
-        im_gpu = im_gpu * inv_alph_masks[-1] + mcs 
-        
+        im_gpu = im_gpu * inv_alph_masks[-1] + mcs      
         im_mask = (im_gpu * 255).byte().cpu().numpy()
-        print(im_mask.shape,"im_mask")
-        # print(torch.min(im_mask),"im_mask")
         self.im[:] = im_mask if retina_masks else scale_image(im_gpu.shape, im_mask, self.im.shape)
         if self.pil:
             # convert im back to PIL and update draw
