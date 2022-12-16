@@ -73,7 +73,7 @@ def run(
     visualize=False,  # visualize features
     update=False,  # update all models
     project=ROOT / 'runs/predict-seg',  # save results to project/name
-    name='exp',  # save results to project/name
+    name='out',  # save results to project/name
     exist_ok=False,  # existing project/name ok, do not increment
     line_thickness=3,  # bounding box thickness (pixels)
     hide_labels=False,  # hide labels
@@ -173,11 +173,30 @@ def run(
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
                 # Mask plotting
+                print([colors(x, True) for x in det[:, 5]])
+                print(masks.shape)
+                mask_combined = torch.zeros([masks.shape[1],masks.shape[2]])
+                print(mask_combined.shape)
+                print(torch.max(mask_combined))
+
+                for i in range(0,masks.shape[0]):
+                  mask_combined = mask_combined  + masks[i]
+                  print(mask_combined.shape)
+                  print(torch.max(mask_combined))
+
+                mask_combined = torch.unsqueeze(mask_combined, dim= 0)
+                print(mask_combined.shape)  
+                mask_combined[mask_combined>0] = 1     
+                mask_combined[mask_combined==1] = 2 
+                mask_combined[mask_combined==0] = 1
+                mask_combined[mask_combined==2] = 0
+        
+                print(torch.max(mask_combined))
+
                 annotator.masks(
-                    masks,
+                    mask_combined,
                     colors=[colors(x, True) for x in det[:, 5]],
-                    im_gpu=torch.as_tensor(im0, dtype=torch.float16).to(device).permute(2, 0, 1).flip(0).contiguous() /
-                    255 if retina_masks else im[i])
+                    im_gpu=torch.as_tensor(im0, dtype=torch.float16).to(device).permute(2, 0, 1).flip(0).contiguous() /255 if retina_masks else im[i])
 
                 # Write results
                 for j, (*xyxy, conf, cls) in enumerate(reversed(det[:, :6])):
@@ -261,7 +280,7 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/predict-seg', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
+    parser.add_argument('--line-thickness', default=0, type=int, help='bounding box thickness (pixels)')
     parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
     parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
