@@ -187,9 +187,9 @@ def run(
                 mask_combined = torch.unsqueeze(mask_combined, dim= 0)
                 print(mask_combined.shape)  
                 mask_combined[mask_combined>0] = 1     
-                mask_combined[mask_combined==1] = 2 
-                mask_combined[mask_combined==0] = 1
-                mask_combined[mask_combined==2] = 0
+                # mask_combined[mask_combined==1] = 2 
+                # mask_combined[mask_combined==0] = 1
+                # mask_combined[mask_combined==2] = 0
         
                 print(torch.max(mask_combined))
                 print(torch.min(mask_combined))
